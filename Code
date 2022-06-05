@@ -152,6 +152,13 @@ spark = SparkSession.builder     .master("local[1]")     .appName("Crypto")     
 {"conf": {"spark.jars.packages": "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1"}}
 people.write.format("mongo").mode("append").option("database", "CryptoCompare").option("collection", "Bitcoin").save()
 sparkDF2.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF3.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF4.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF5.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF6.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF7.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF8.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+sparkDF9.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
 
 # I'll focus on Bitcoin for this Spark SQL analysis
 sns.set_theme(style="whitegrid")
