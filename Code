@@ -1,0 +1,175 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+#pip install pyspark
+get_ipython().system('pip install pymongo')
+#pip3 install cryptocompare
+
+import pymongo
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+
+db = client['Crypto']
+db
+
+import cryptocompare
+import pyspark
+import json
+import requests
+import datetime
+import pandas as pd
+
+#Bitcoin BTC
+#Ethereum ETH
+#Terra LUNA
+#Solano SOL
+#XRP
+#Avalanche AVAX
+#Binance Coin BNB
+#Cosmos ATOM
+
+cryptocompare.cryptocompare._set_api_key_parameter('322055380601da62969bed400bb29b18049bf7cb014b224171c1bde8bc7ce5bf')
+cryptocompare.get_coin_list(format=True)
+cryptocompare.get_price(['BTC'], ['ETH', 'LUNA', 'SOL', 'XRP', 'AVAX', 'BNB', 'ATOM'])
+cryptocompare.get_exchanges()
+
+# creates a dataframe from the cryptocompare json data
+def get_crypto_price(symbol, exchange, hours):
+    api_key = '322055380601da62969bed400bb29b18049bf7cb014b224171c1bde8bc7ce5bf'
+    api_url = f'https://min-api.cryptocompare.com/data/v2/histohour?fsym={symbol}&tsym={exchange}&limit={hours}&api_key={api_key}'
+    raw = requests.get(api_url).json()
+    df = pd.DataFrame(raw['Data']['Data'])[['time', 'high', 'low', 'open']].set_index('time')
+    df.index = pd.to_datetime(df.index, unit = 's')
+    return df
+
+# Call API to get historic prices
+btc = get_crypto_price('BTC', 'USD', 2000)
+btc2 = btc
+# The schema does not include the Date Time. Spark doesn't understand index columns from the pandas dataframe so I'll need to reset the index.
+btc2.reset_index(drop=False,inplace=True)
+btc3 = btc2.drop('index', 1)
+
+# create a DataFrame from a pandas.DataFrame
+from pyspark.sql.types import StructType,StructField, StringType, FloatType, TimestampType
+#Create custom Schema using StructType. The schema needs to include the Date Time column
+mySchema = StructType([StructField("time", TimestampType(), True) ,StructField("high", FloatType(), True),
+                       StructField("low", FloatType(), True), StructField("open", FloatType(), True)])
+#Create DataFrame by changing schema
+sparkDF2 = spark.createDataFrame(btc3,schema=mySchema)
+sparkDF2.printSchema()
+sparkDF2.show()
+
+# Call API to get historic prices
+eth = get_crypto_price('ETH', 'USD', 2000)
+eth2 = eth
+eth2.reset_index(drop=False,inplace=True)
+eth2 = eth2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF3 = spark.createDataFrame(eth2,schema=mySchema)
+sparkDF3.printSchema()
+sparkDF3.show()
+
+# Call API to get historic prices
+luna = get_crypto_price('LUNA', 'USD', 2000)
+luna2 = luna
+luna2.reset_index(drop=False,inplace=True)
+luna2 = luna2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF4 = spark.createDataFrame(luna2,schema=mySchema)
+sparkDF4.printSchema()
+sparkDF4.show()
+
+# Call API to get historic prices
+sol = get_crypto_price('SOL', 'USD', 2000)
+sol2 = sol
+sol2.reset_index(drop=False,inplace=True)
+sol2 = sol2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF5 = spark.createDataFrame(sol2,schema=mySchema)
+sparkDF5.printSchema()
+sparkDF5.show()
+
+# Call API to get historic prices
+xrp = get_crypto_price('XRP', 'USD', 2000)
+xrp2 = xrp
+xrp2.reset_index(drop=False,inplace=True)
+xrp2 = xrp2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF6 = spark.createDataFrame(xrp2,schema=mySchema)
+sparkDF6.printSchema()
+sparkDF6.show()
+
+# Call API to get historic prices
+avax = get_crypto_price('AVAX', 'USD', 2000)
+avax2 = avax
+avax2.reset_index(drop=False,inplace=True)
+avax2 = avax2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF7 = spark.createDataFrame(avax2,schema=mySchema)
+sparkDF7.printSchema()
+sparkDF7.show()
+
+# Call API to get historic prices
+bnb = get_crypto_price('BNB', 'USD', 2000)
+bnb2 = bnb
+bnb2.reset_index(drop=False,inplace=True)
+bnb2 = bnb2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF8 = spark.createDataFrame(bnb2,schema=mySchema)
+sparkDF8.printSchema()
+sparkDF8.show()
+
+# Call API to get historic prices
+atom = get_crypto_price('ATOM', 'USD', 2000)
+atom2 = atom
+atom2.reset_index(drop=False,inplace=True)
+atom2 = atom2.drop('index', 1)
+#Create Spark DataFrame
+sparkDF9 = spark.createDataFrame(atom2,schema=mySchema)
+sparkDF9.printSchema()
+sparkDF9.show()
+
+btc.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\btc.csv', index = True, header=True)
+eth.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\eth.csv', index = True, header=True)
+luna.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\luna.csv', index = True, header=True)
+sol.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\sol.csv', index = True, header=True)
+xrp.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\xrp.csv', index = True, header=True)
+avax.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\avax.csv', index = True, header=True)
+bnb.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\bnb.csv', index = True, header=True)
+atom.to_csv (r'C:\Users\ckfoy\OneDrive\Documents\MSDE_692_Practicum_I\atom.csv', index = True, header=True)
+
+
+# Create SparkSession with MongoDB Configuration so I can write to and store in MongoDB
+working_directory = 'C:/spark/spark-3.2.1-bin-hadoop3.2/bin/jars*'
+#Create PySpark SparkSession
+spark = SparkSession.builder     .master("local[1]")     .appName("CryptoCompare")     .config("spark.mongodb.input.uri", "mongodb://localhost:27017/Crypto.Bitcoin")     .config("spark.mongodb.output.uri", "mongodb://localhost:27017/Crypto.Bitcoin")     .config('spark.driver.extraClassPath', working_directory)     .getOrCreate()
+
+#Create PySpark SparkSession
+from pyspark.sql import SparkSession
+spark = SparkSession.builder     .master("local[1]")     .appName("Crypto")     .getOrCreate()
+
+# save and append to MongoDB
+{"conf": {"spark.jars.packages": "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1"}}
+people.write.format("mongo").mode("append").option("database", "CryptoCompare").option("collection", "Bitcoin").save()
+sparkDF2.write.format("com.mongodb.spark.sql.DefaultSource").option("replaceDocument", "false").mode("append").save()
+
+# I'll focus on Bitcoin for this Spark SQL analysis
+sns.set_theme(style="whitegrid")
+sns.lineplot(x = "time", y = "high", data = btc)
+plt.title('High Prices')
+plt.xlabel('Time')
+plt.ylabel('High')
+plt.show()
+
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid")
+sns.set(rc={'figure.figsize':(15,9)})
+sns.lineplot('time', 'value', hue='variable', 
+             data=pd.melt(btc3, 'time'))
+plt.title('Bitcoin High-Low-Open Prices', fontsize = 20)
+plt.xlabel('Date', fontsize=15)
+plt.ylabel('US Dollar', fontsize=15)
+plt.show()
